@@ -45,7 +45,7 @@ add_library(timers
   perf_utils.F90)
 
 target_compile_definitions(timers PRIVATE FORTRANUNDERSCORE HAVE_MPI LINUX PERFSTUBS_USE_TIMERS)
-target_link_libraries(timers PUBLIC MPI::MPI_C global_settings)
+target_link_libraries(timers PUBLIC MPI::MPI_C "${CMAKE_DL_LIBS}") # global_settings)
 if(OpenMP_FOUND)
     target_link_libraries(timers PRIVATE OpenMP::OpenMP_C)
     target_link_libraries(timers PRIVATE OpenMP::OpenMP_Fortran)
@@ -60,3 +60,6 @@ install (FILES ${CMAKE_BINARY_DIR}/perf_utils.mod DESTINATION include)
 # provide under CAMTIMERS::CAMTIMERS name
 add_library(CAMTIMERS::CAMTIMERS INTERFACE IMPORTED GLOBAL)
 target_link_libraries(CAMTIMERS::CAMTIMERS INTERFACE timers)
+
+add_executable(example1 example1.F90)
+target_link_libraries(example1 PRIVATE CAMTIMERS::CAMTIMERS MPI::MPI_Fortran)
