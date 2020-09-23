@@ -1,11 +1,17 @@
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.18)
 
 project(Camtimers)
 enable_language(C Fortran)
 
+option(CAMTIMERS_USE_NVTX "use_nvtx" OFF)
+
 find_package(MPI REQUIRED)
 find_package(OpenMP)
+
+if (CAMTIMERS_USE_NVTX)
+  find_package(CUDAToolkit REQUIRED)
+endif()
 
 # Clone the perfstubs repo if it doesn't exist
 
@@ -51,6 +57,11 @@ if(OpenMP_FOUND)
     target_link_libraries(timers PRIVATE OpenMP::OpenMP_Fortran)
 endif(OpenMP_FOUND)
 target_include_directories(timers PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/perfstubs)
+
+if(CAMTIMERS_USE_NVTX)
+  target_compile_definitions(timers PRIVATE HAVE_NVTX)
+  target_link_libraries(timers PRIVATE CUDA::nvToolsExt)
+endif()
 
 install(TARGETS timers)
 install (FILES gptl.h DESTINATION include)

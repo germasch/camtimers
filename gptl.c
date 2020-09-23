@@ -24,6 +24,10 @@
 #include <papi.h>          /* PAPI_get_real_usec */
 #endif
 
+#ifdef HAVE_NVTX
+#include <nvToolsExt.h>
+#endif
+
 #ifdef HAVE_LIBRT
 #include <time.h>
 #endif
@@ -981,6 +985,9 @@ int GPTLstart (const char *timername)                  /* timer name */
   /* the name isn't null terminated. :( */
   char * dummy = strndup(name, numchars);
   PERFSTUBS_START_STRING(dummy);
+#ifdef HAVE_NVTX
+  nvtxRangePush(dummy);
+#endif
   free(dummy);
 
   /*
@@ -1104,6 +1111,9 @@ int GPTLstart_handle (const char *name,  /* timer name */
   }
   // else...
   PERFSTUBS_START_STRING(name);
+#ifdef HAVE_NVTX
+  nvtxRangePush(name);
+#endif
 
   if (wallstats.enabled && profileovhd.enabled){
     if (t == 0){
@@ -1259,6 +1269,9 @@ int GPTLstartf (const char *timername, const int namelen)    /* timer name and l
   /* the name isn't null terminated. :( */
   char * dummy = strndup(name, numchars);
   PERFSTUBS_START_STRING(dummy);
+#ifdef HAVE_NVTX
+  nvtxRangePush(dummy);
+#endif
   free(dummy);
 
   /*
@@ -1554,6 +1567,9 @@ int GPTLstartf_virtual (const char *timername, int *tid, const int namelen)
   /* the name isn't null terminated. :( */
   char * dummy = strndup(name, numchars);
   PERFSTUBS_START_STRING(dummy);
+#ifdef HAVE_NVTX
+  nvtxRangePush(dummy);
+#endif
   free(dummy);
 
   /*
@@ -1975,7 +1991,10 @@ int GPTLstop (const char *timername)         /* timer name */
   }
 
   PERFSTUBS_STOP_STRING(name);
-
+#ifdef HAVE_NVTX
+  nvtxRangePop();
+#endif
+  
   if ( ! (ptr = getentry (hashtable[t], name, &indx)))
     return GPTLerror ("%s thread %d: timer for %s had not been started.\n", thisfunc, t, name);
 
@@ -2069,6 +2088,9 @@ int GPTLstop_handle (const char *name,     /* timer name */
   }
   // else...
   PERFSTUBS_STOP_STRING(name);
+#ifdef HAVE_NVTX
+  nvtxRangePop();
+#endif
 
 
   /* Get the timestamp */
@@ -2239,6 +2261,9 @@ int GPTLstopf (const char *timername, const int namelen) /* timer name and lengt
   }
 
   PERFSTUBS_STOP_STRING(name);
+#ifdef HAVE_NVTX
+  nvtxRangePop();
+#endif
 
   if ( ! (ptr = getentryf (hashtable[t], name, numchars, &indx))){
     //pw    numchars = MIN (namelen, MAX_CHARS);
@@ -2347,6 +2372,9 @@ int GPTLstopf_handle (const char *name,     /* timer name */
   // else...
   char * dummy = strndup(name, namelen);
   PERFSTUBS_STOP_STRING(dummy);
+#ifdef HAVE_NVTX
+  nvtxRangePop();
+#endif
   free(dummy);
 
   /* Get the timestamp */
@@ -2520,6 +2548,9 @@ int GPTLstopf_virtual (const char *timername, int *tid, const int namelen)
   }
 
   PERFSTUBS_STOP_STRING(name);
+#ifdef HAVE_NVTX
+  nvtxRangePop();
+#endif
 
   if ( ! (ptr = getentryf (hashtable[t], name, numchars, &indx))){
     //pw    numchars = MIN (namelen, MAX_CHARS);
